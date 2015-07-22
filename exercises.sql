@@ -320,4 +320,4 @@ UNION
 SElECT low FROM tutorial.aapl_historical_stock_price
 ) as price)
 /
-CAST((SELECT COUNT(*) FROM tutorial.aapl_historical_stock_price) AS float)
+CAST((SELECT COUNT(*)*4 FROM tutorial.aapl_historical_stock_price) AS float)
