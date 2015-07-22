@@ -181,7 +181,7 @@ SELECT artist
 FROM tutorial.billboard_top_100_year_end
 WHERE year >= 1985 AND artist IS NOT NULL
 GROUP BY artist
-ORDER BY count(artist)
+ORDER BY count(artist) DESC
 LIMIT 10
 
 -- The total count of top 10 hits written by either Elvis, Madonna, the Beatles, or Elton John
@@ -309,15 +309,58 @@ SElECT low FROM tutorial.aapl_historical_stock_price
 -- Return the percentage of unique prices compared to all prices in the data set
 
 SELECT
-(SELECT count(price) FROM
 (
-SElECT open FROM tutorial.aapl_historical_stock_price
-UNION
-SElECT close FROM tutorial.aapl_historical_stock_price
-UNION
-SElECT high FROM tutorial.aapl_historical_stock_price
-UNION
-SElECT low FROM tutorial.aapl_historical_stock_price
-) as price)
+  SELECT count(price) FROM
+  (
+    SElECT open FROM tutorial.aapl_historical_stock_price
+    UNION
+    SElECT close FROM tutorial.aapl_historical_stock_price
+    UNION
+    SElECT high FROM tutorial.aapl_historical_stock_price
+    UNION
+    SElECT low FROM tutorial.aapl_historical_stock_price
+  ) as price
+)
 /
-CAST((SELECT COUNT(*)*4 FROM tutorial.aapl_historical_stock_price) AS float)
+  CAST
+  (
+    (SELECT COUNT(*)*4 FROM tutorial.aapl_historical_stock_price) AS float
+  )
+
+-- A listing of all months by their average daily trading volume and a classification that puts this volume into the following categories: "Low" = below 10MM, "Medium" = 10-25 MM, "High" = above 25MM
+
+SELECT month
+     , avg(volume) as avg_vol
+     , CASE 
+          WHEN avg(volume) < 10000000 THEN 'LOW'
+          WHEN avg(volume) BETWEEN 10000000 AND 25000000 THEN 'Medium'
+          WHEN avg(volume) > 25000000 THEN 'High'
+        END as category
+FROM tutorial.aapl_historical_stock_price
+GROUP BY month
+ORDER BY month
+
+-- A listing of average monthly price plus which quarter of the year they are in (e.g. "Q2" or "Q4").
+
+SELECT month
+     , (avg(high) + avg(low)) / 2 as avg_price
+     , CASE
+         WHEN month BETWEEN 1 AND 3 THEN 'Q1'
+         WHEN month BETWEEN 4 AND 6 THEN 'Q2'
+         WHEN month BETWEEN 7 AND 9 THEN 'Q3'
+         WHEN month BETWEEN 10 AND 12 THEN 'Q4'
+       END as quarter
+FROM tutorial.aapl_historical_stock_price
+GROUP BY month
+ORDER BY month
+
+-- This same listing filtered for only Q4 (use the new column not the months explicitly as part of this filtering).
+
+SELECT (avg(high) + avg(low)) / 2 as avg_price
+     , 'Q4'
+FROM tutorial.aapl_historical_stock_price
+WHERE month BETWEEN 10 AND 12
+GROUP BY month
+
+
+
