@@ -305,3 +305,19 @@ SElECT high FROM tutorial.aapl_historical_stock_price
 UNION
 SElECT low FROM tutorial.aapl_historical_stock_price
 ) as price
+
+-- Return the percentage of unique prices compared to all prices in the data set
+
+SELECT
+(SELECT count(price) FROM
+(
+SElECT open FROM tutorial.aapl_historical_stock_price
+UNION
+SElECT close FROM tutorial.aapl_historical_stock_price
+UNION
+SElECT high FROM tutorial.aapl_historical_stock_price
+UNION
+SElECT low FROM tutorial.aapl_historical_stock_price
+) as price)
+/
+CAST((SELECT COUNT(*) FROM tutorial.aapl_historical_stock_price) AS float)
